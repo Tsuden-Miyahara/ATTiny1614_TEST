@@ -13,9 +13,9 @@ void setup() {
 void loop() {
   pixels.clear();
 
-  for(int i = 0; i < NUM_LEDS; i++) {
-    pixels.setPixelColor(i, pixels.Color(90, 60, 80));
-    pixels.show();
-    delay(250);
+  for(int i = 0; i < NUM_LEDS; i++) {// rgb(90, 60, 80): Cherry
+    pixels.setPixelColor(i, pixels.Color(20 + random(108), 20 + random(108), 20 + random(108)));
   }
+  pixels.show();
+  delay(100);
 }
