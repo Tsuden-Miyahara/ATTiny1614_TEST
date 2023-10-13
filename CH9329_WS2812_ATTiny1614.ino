@@ -79,7 +79,7 @@ void setup() {
 void loop() {
 
   pixels.clear();
-  for(int i = 0; i < NUM_LEDS; i++) {// rgb(90, 60, 80): Cherry
+  for(uint8_t i = 0; i < NUM_LEDS; i++) {// rgb(90, 60, 80): Cherry
     pixels.setPixelColor(
       i,
       getColor(
@@ -120,14 +120,12 @@ ISR(TCB0_INT_vect) {
       fastDigitalWrite(ROT_LED_1, HIGH);
       fastDigitalWrite(ROT_LED_2, LOW);
     }
-
     stat = _temp;
     oldPosition = newPosition;
   }
 
   incomingData = myShiftIn(HC165_SER, HC165_CLK, HC165_SL);
   
-
   if (incomingData != incomingDataOld){
     incomingDataOld = incomingData;
   }
@@ -150,7 +148,7 @@ byte myShiftIn(int dataPin, int clockPin, int loadPin){
   fastDigitalWrite(loadPin, HIGH); //確定
   
   data = fastDigitalRead(dataPin); //Hの値を読む
-  for (int i=1; i<8; i++){
+  for (uint8_t i = 1; i < 8; i++){
     fastDigitalWrite(clockPin, HIGH);
     data = data << 1 | (fastDigitalRead(dataPin)); //G,F,E...Aの値を読む
     fastDigitalWrite(clockPin, LOW);
