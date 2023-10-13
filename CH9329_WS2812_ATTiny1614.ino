@@ -60,6 +60,8 @@ void setup() {
   
   pinMode(ROT_LED_1, OUTPUT);
   pinMode(ROT_LED_2, OUTPUT);
+
+  pinMode(ROT_SW, INPUT_PULLUP);
   
   digitalWrite(HC165_SL, HIGH);
   digitalWrite(HC165_CLK, LOW);
@@ -77,6 +79,15 @@ void setup() {
 }
 
 void loop() {
+
+  if (fastDigitalRead(ROT_SW) == LOW) {
+    stat = 0;
+    fastDigitalWrite(ROT_LED_1, HIGH);
+    fastDigitalWrite(ROT_LED_2, HIGH);
+    while (fastDigitalRead(ROT_SW) == LOW);
+    fastDigitalWrite(ROT_LED_1, LOW);
+    fastDigitalWrite(ROT_LED_2, LOW);
+  }
 
   pixels.clear();
   for(uint8_t i = 0; i < NUM_LEDS; i++) {// rgb(90, 60, 80): Cherry
