@@ -3,6 +3,7 @@
 #include <avr/power.h>
 
 #include <RotaryEncoder.h>
+#include <SoftwareSerial.h>
 
 // 74HC165 (Keys)
 #define HC165_SL     PIN_PA1 // SHLD (1)
@@ -20,6 +21,10 @@
 #define ROT_A        PIN_PB0
 #define ROT_B        PIN_PB1
 
+// CH9329 (HID)
+#define CH9329_TX    PIN_PB2
+#define CH9329_RX    PIN_PB3
+
 #define STAT         24
 #define TIMER_PERIOD 10
 
@@ -33,6 +38,8 @@ volatile uint8_t stat = 0;
 
 RotaryEncoder encoder(ROT_B, ROT_A, RotaryEncoder::LatchMode::FOUR3);
 
+SoftwareSerial CH9329_Serial(CH9329_RX, CH9329_TX);
+
 // Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ400);
 tinyNeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 volatile uint32_t timer_count = 0;
@@ -41,6 +48,7 @@ byte myShiftIn(int dataPin, int clockPin, int loadPin);
 uint32_t getColor(bool pushed, uint8_t lv);
 
 void setup() {
+  CH9329_Serial.begin(9600);
   pixels.begin();
   
   pinMode(HC165_SL, OUTPUT);
