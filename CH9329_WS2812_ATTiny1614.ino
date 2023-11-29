@@ -1,3 +1,5 @@
+#include <CH9329_Keyboard.h>
+
 // #include <Adafruit_NeoPixel.h>
 #include <tinyNeoPixel.h>
 #include <avr/power.h>
@@ -6,6 +8,7 @@
 // #include <SoftwareSerial.h>
 
 //#include "CH9329.h"
+
 
 // 74HC165 (Keys)
 #define HC165_SL     PIN_PA1 // SHLD (1)
@@ -30,13 +33,15 @@
 #define STAT         24
 #define TIMER_PERIOD 10
 
-volatile uint16_t incomingData;
-volatile uint16_t incomingDataOld;
+volatile uint16_t _incomingData;
+volatile uint16_t incomingData = 0xFFFF;
+volatile uint16_t incomingDataOld = 0xFFFF;
 
 volatile long oldPosition = -999;
 volatile long newPosition = 0;
 volatile uint8_t stat = 0;
 
+uint8_t reportData[KEY_REPORT_DATA_LENGTH] = {};
 
 RotaryEncoder encoder(ROT_B, ROT_A, RotaryEncoder::LatchMode::FOUR3);
 
@@ -53,6 +58,8 @@ void Press(byte ckey, byte ukey);
 
 void setup() {
   Serial.begin(9600);
+  CH9329_Keyboard.begin(Serial);
+
   pixels.begin();
   
   pinMode(HC165_SL, OUTPUT);
@@ -95,18 +102,28 @@ void loop() {
   }
 
   pixels.clear();
+  _incomingData = incomingData;
   for(uint8_t i = 0; i < NUM_LEDS; i++) {// rgb(90, 60, 80): Cherry
     pixels.setPixelColor(
       i,
       getColor(
-        (incomingData >> i & 1) == 0,
-        stat / 8 + (i < (stat % 8) ? 1 : 0)
+        isPressed(i),
+        getLv(i)
       )
     );
   }
   pixels.show();
 
-  // if ((incomingData >> 0 & 2) == 0) Press(0x02, 0x0B);
+  if (isPressed(0)) {
+    switch(getLv(0)) {
+      case 0:
+        CH9329_Keyboard.print("Hello World!\n");
+        break;
+      default:
+        CH9329_Keyboard.print("Hi there!\n");
+        break;
+    }
+  }
 }
 
 volatile uint8_t _temp;
@@ -186,8 +203,14 @@ uint8_t fastDigitalRead(uint8_t pin)
   return LOW;
 }
 
-uint32_t getColor(bool pushed, uint8_t lv) {
-  if (pushed) return pixels.Color(255, 255, 255);
+bool isPressed(byte i) {
+  return (_incomingData >> i & 1) == 0;
+}
+byte getLv(byte i) {
+  return stat / 8 + (i < (stat % 8) ? 1 : 0);
+}
+uint32_t getColor(bool pressed, uint8_t lv) {
+  if (pressed) return pixels.Color(255, 255, 255);
   switch(lv) {
     case 1: return pixels.Color(30, 50, 90);
     case 2: return pixels.Color(60, 90, 20);
@@ -196,7 +219,8 @@ uint32_t getColor(bool pushed, uint8_t lv) {
   }
 }
 
-
+/*
+byte keyRelease[14] = {0x57,0xAB,0x00,0x02,0x08,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0C};
 void Press(byte ckey, byte ukey) {
   byte sum = 0x10C + ckey + ukey;
   byte keyPress[14] = {
@@ -206,10 +230,18 @@ void Press(byte ckey, byte ukey) {
     ukey,0x00,0x00,0x00,0x00,0x00,
     sum
   };
-  byte keyRelease[14] = {0x57,0xAB,0x00,0x02,0x08,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0C};
+  fastDigitalWrite(ROT_LED_1, HIGH);
+  fastDigitalWrite(ROT_LED_2, LOW);
   Serial.write(keyPress, 14);
-  while(Serial.available() > 0) {Serial.read();}
+  //while(Serial.available() > 0) {Serial.read();}
   Serial.write(keyRelease, 14);
-  while(Serial.available() > 0) {Serial.read();}
+  //while(Serial.available() > 0) {Serial.read();}
+  fastDigitalWrite(ROT_LED_1, LOW);
+  fastDigitalWrite(ROT_LED_2, HIGH);
   //delay(5);
 }
+*/
+
+
+
+
