@@ -115,7 +115,10 @@ void loop() {
   pixels.show();
 
   if (isPressed(0)) {
-    switch(getLv(0)) {
+    CH9329_Keyboard.write(KEY_KP_ENTER);
+  }
+  else if (isPressed(1)) {
+    switch(getLv(1)) {
       case 0:
         CH9329_Keyboard.print("Hello World!\n");
         break;
