@@ -3,7 +3,9 @@
 #include <avr/power.h>
 
 #include <RotaryEncoder.h>
-#include <SoftwareSerial.h>
+// #include <SoftwareSerial.h>
+
+//#include "CH9329.h"
 
 // 74HC165 (Keys)
 #define HC165_SL     PIN_PA1 // SHLD (1)
@@ -38,7 +40,8 @@ volatile uint8_t stat = 0;
 
 RotaryEncoder encoder(ROT_B, ROT_A, RotaryEncoder::LatchMode::FOUR3);
 
-SoftwareSerial CH9329_Serial(CH9329_RX, CH9329_TX);
+//SoftwareSerial CH9329_Serial(CH9329_TX, CH9329_RX);
+//Keyboard kb = Keyboard(&Serial);
 
 // Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ400);
 tinyNeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -46,9 +49,10 @@ volatile uint32_t timer_count = 0;
 
 byte myShiftIn(int dataPin, int clockPin, int loadPin);
 uint32_t getColor(bool pushed, uint8_t lv);
+void Press(byte ckey, byte ukey);
 
 void setup() {
-  CH9329_Serial.begin(9600);
+  Serial.begin(9600);
   pixels.begin();
   
   pinMode(HC165_SL, OUTPUT);
@@ -82,6 +86,7 @@ void loop() {
 
   if (fastDigitalRead(ROT_SW) == LOW) {
     stat = 0;
+    encoder.setPosition(0);
     fastDigitalWrite(ROT_LED_1, HIGH);
     fastDigitalWrite(ROT_LED_2, HIGH);
     while (fastDigitalRead(ROT_SW) == LOW);
@@ -100,7 +105,8 @@ void loop() {
     );
   }
   pixels.show();
-  
+
+  // if ((incomingData >> 0 & 2) == 0) Press(0x02, 0x0B);
 }
 
 volatile uint8_t _temp;
@@ -181,14 +187,29 @@ uint8_t fastDigitalRead(uint8_t pin)
 }
 
 uint32_t getColor(bool pushed, uint8_t lv) {
-  if (pushed) return pixels.Color(90, 70, 20);
+  if (pushed) return pixels.Color(255, 255, 255);
   switch(lv) {
     case 1: return pixels.Color(30, 50, 90);
     case 2: return pixels.Color(60, 90, 20);
-    case 3: return pixels.Color(35, 20, 100);
+    case 3: return pixels.Color(90, 50, 10);
     default: return pixels.Color(90, 60, 80);
   }
 }
 
 
-
+void Press(byte ckey, byte ukey) {
+  byte sum = 0x10C + ckey + ukey;
+  byte keyPress[14] = {
+    0x57,0xAB,0x00,0x02,0x08,
+    ckey,
+    0x00,
+    ukey,0x00,0x00,0x00,0x00,0x00,
+    sum
+  };
+  byte keyRelease[14] = {0x57,0xAB,0x00,0x02,0x08,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0C};
+  Serial.write(keyPress, 14);
+  while(Serial.available() > 0) {Serial.read();}
+  Serial.write(keyRelease, 14);
+  while(Serial.available() > 0) {Serial.read();}
+  //delay(5);
+}
