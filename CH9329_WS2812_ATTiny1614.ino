@@ -122,6 +122,9 @@ void loop() {
       case 0:
         CH9329_Keyboard.print("Hello World!\n");
         break;
+      case 1:
+        CH9329_Keyboard.print("こんにちは！\n");
+        break;
       default:
         CH9329_Keyboard.print("Hi there!\n");
         break;
