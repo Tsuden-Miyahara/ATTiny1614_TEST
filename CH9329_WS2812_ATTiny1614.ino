@@ -115,15 +115,21 @@ void loop() {
   pixels.show();
 
   if (isPressed(0)) {
-    CH9329_Keyboard.write(KEY_KP_ENTER);
+    CH9329_Keyboard.press(KEY_LEFT_GUI);
+    CH9329_Keyboard.press(0x72);
+    CH9329_Keyboard.releaseAll();
   }
   else if (isPressed(1)) {
     switch(getLv(1)) {
       case 0:
-        CH9329_Keyboard.print("Hello World!\n");
+        CH9329_Keyboard.print("cmd\n");
+        delay(200);
+        CH9329_Keyboard.print("chcp 65001\n");
         break;
       case 1:
-        CH9329_Keyboard.print("こんにちは！\n");
+        CH9329_Keyboard.press(KEY_LEFT_GUI);
+        CH9329_Keyboard.press(0x72);
+        CH9329_Keyboard.releaseAll();
         break;
       default:
         CH9329_Keyboard.print("Hi there!\n");
